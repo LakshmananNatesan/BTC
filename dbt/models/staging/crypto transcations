@@ -1,0 +1,34 @@
+-- Staging layer: light transformation only (rename, cast, trim).
+-- No business logic here — that belongs in marts. This model's job is to
+-- be the single place that translates "whatever raw looks like" into
+-- "what every downstream model can trust."
+
+with source as (
+
+    select * from {{ source('raw', 'crypto_transactions') }}
+
+),
+
+renamed as (
+
+    select
+        transaction_id,
+        sender_address,
+        receiver_address,
+        amount,
+        transaction_fee,
+        transaction_ts                          as transaction_timestamp,
+        block_id,
+        mining_pool,
+        upper(trim(currency))                    as currency,
+        lower(trim(transaction_type))             as transaction_type,
+        lower(trim(transaction_status))            as transaction_status,
+        gas_price_gwei,
+        dt                                       as transaction_date,
+        _loaded_at
+
+    from source
+
+)
+
+select * from renamed
