@@ -1,0 +1,11 @@
+currency_code,currency_name,is_evm_chain
+BTC,Bitcoin,false
+ETH,Ethereum,true
+USDT,Tether,true
+USDC,USD Coin,true
+BNB,BNB,true
+SOL,Solana,false
+XRP,XRP,false
+ADA,Cardano,false
+DOGE,Dogecoin,false
+MATIC,Polygon,true
