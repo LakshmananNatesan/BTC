@@ -1,0 +1,81 @@
+version: 2
+
+models:
+  - name: stg_crypto_transactions
+    description: >
+      One row per crypto transaction, typed and renamed from raw.
+      Contract enforced: if the raw source's shape changes in a way that
+      breaks this contract, the model fails to build instead of silently
+      passing bad data downstream.
+    config:
+      contract:
+        enforced: true
+    columns:
+      - name: transaction_id
+        data_type: string
+        constraints:
+          - type: not_null
+          - type: unique
+        data_tests:
+          - not_null
+          - unique
+
+      - name: sender_address
+        data_type: string
+
+      - name: receiver_address
+        data_type: string
+
+      - name: amount
+        data_type: number(38,18)
+        constraints:
+          - type: not_null
+        data_tests:
+          - not_null
+          - dbt_utils.accepted_range:
+              min_value: 0
+              inclusive: true
+
+      - name: transaction_fee
+        data_type: number(38,18)
+
+      - name: transaction_timestamp
+        data_type: timestamp_ntz
+        constraints:
+          - type: not_null
+        data_tests:
+          - not_null
+
+      - name: block_id
+        data_type: string
+
+      - name: mining_pool
+        data_type: string
+
+      - name: currency
+        data_type: string
+        data_tests:
+          - not_null
+          - relationships:
+              to: ref('seed_supported_currencies')
+              field: currency_code
+
+      - name: transaction_type
+        data_type: string
+
+      - name: transaction_status
+        data_type: string
+        data_tests:
+          - accepted_values:
+              values: ['success', 'failed', 'pending']
+
+      - name: gas_price_gwei
+        data_type: number(38,9)
+
+      - name: transaction_date
+        data_type: date
+        constraints:
+          - type: not_null
+
+      - name: _loaded_at
+        data_type: timestamp_ntz
