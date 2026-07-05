@@ -1,0 +1,28 @@
+version: 2
+
+sources:
+  - name: raw
+    database: CRYPTO_DB
+    schema: raw
+    tables:
+      - name: crypto_transactions
+        description: >
+          Raw crypto transaction data loaded via COPY INTO from the S3
+          processed zone (output of the PySpark ingestion job).
+        loaded_at_field: _loaded_at
+        freshness:
+          warn_after: {count: 6, period: hour}
+          error_after: {count: 24, period: hour}
+        columns:
+          - name: transaction_id
+            description: Unique transaction identifier, source system's primary key.
+            data_tests:
+              - not_null
+              - unique
+          - name: amount
+            description: Transaction amount in the native currency's unit.
+          - name: transaction_status
+            description: success, failed, or pending.
+            data_tests:
+              - accepted_values:
+                  values: ['success', 'failed', 'pending']
