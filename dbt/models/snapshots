@@ -1,0 +1,26 @@
+-- Transactions start pending and later resolve to success/failed. A plain
+-- table only ever shows the *current* status, which loses the "how long
+-- did this sit pending" signal. A snapshot captures every status change
+-- as a new row (SCD Type 2), so we can measure confirmation latency and
+-- reconstruct state as of any point in time.
+
+{% snapshot snap_transaction_status %}
+
+{{
+    config(
+        target_schema='snapshots',
+        unique_key='transaction_id',
+        strategy='check',
+        check_cols=['transaction_status'],
+    )
+}}
+
+select
+    transaction_id,
+    transaction_status,
+    amount,
+    transaction_timestamp,
+    _loaded_at
+from {{ ref('stg_crypto_transactions') }}
+
+{% endsnapshot %}
